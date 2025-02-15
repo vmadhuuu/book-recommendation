@@ -4,6 +4,8 @@ env:
   variables:
     AWS_DEFAULT_REGION: "us-east-1"
     AWS_ACCOUNT_ID: "222634408261"
+    REPOSITORY_URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+    IMAGE_TAG: $(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
 
 phases:
   pre_build:
