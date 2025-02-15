@@ -1,0 +1,37 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the frontend Docker image...
+      - docker build -t $REPOSITORY_URI/book-recommendation-frontend:$IMAGE_TAG ./frontend
+      - docker tag $REPOSITORY_URI/book-recommendation-frontend:$IMAGE_TAG $REPOSITORY_URI/book-recommendation-frontend:latest
+      - echo Building the backend Docker image...
+      - docker build -t $REPOSITORY_URI/book-recommendation-backend:$IMAGE_TAG ./backend
+      - docker tag $REPOSITORY_URI/book-recommendation-backend:$IMAGE_TAG $REPOSITORY_URI/book-recommendation-backend:latest
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing frontend images...
+      - docker push $REPOSITORY_URI/book-recommendation-frontend:$IMAGE_TAG
+      - docker push $REPOSITORY_URI/book-recommendation-frontend:latest
+      - echo Pushing backend images...
+      - docker push $REPOSITORY_URI/book-recommendation-backend:$IMAGE_TAG
+      - docker push $REPOSITORY_URI/book-recommendation-backend:latest
+      - echo Writing image definitions file...
+      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI/book-recommendation-frontend:latest > frontend-imageDefinitions.json
+      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI/book-recommendation-backend:latest > backend-imageDefinitions.json
+
+artifacts:
+  files:
+    - frontend-imageDefinitions.json
+    - backend-imageDefinitions.json
+    - appspec.yml
+    - taskdef.json

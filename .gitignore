@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+*.pth
+myenv
+nginx
+
+# Node
+node_modules/
+npm-debug.log
+build/
+package-lock.json
+yarn.lock
+
+# Data
+*.csv
+*.xlsx
+*.xls
+*.db
+*.sqlite3
+
+# AWS
+.aws/
+awscli-bundle
+awscli-bundle.zip
